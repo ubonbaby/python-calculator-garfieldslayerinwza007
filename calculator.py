@@ -3,32 +3,55 @@ class Calculator:
         return a + b
 
     def subtract(self, a, b):
-        return b - a
+        return a - b
 
     def multiply(self, a, b):
         result = 0
-        for i in range(b+1):
-            result = self.add(result, a)
+        if b < 0:
+            b_positive = 0 - b
+            for i in range(b_positive): 
+                result = self.add(result, a)
+            result = 0 - result
+        else:
+            for i in range(b): 
+                result = self.add(result, a)
         return result
 
     def divide(self, a, b):
-        result = 0
-        while a > b:
-            a = self.subtract(a, b)
-            result += 1
-        return result
-    
-    def modulo(self, a, b):
-        while a <= b:
-            a = a-b
-        return a
+        if b == 0:
+            # ป้องกันการหารด้วยศูนย์
+            return 0 
 
-# Example usage:
-if __name__ == "__main__":
-    calc = Calculator()
-    print("This is a simple calculator class!")
-    print("Example: addition: ", calc.add(1, 2))
-    print("Example: subtraction: ", calc.subtract(4, 2))
-    print("Example: multiplication: ", calc.multiply(2, 3))
-    print("Example: division: ", calc.divide(10, 2))
-    print("Example: modulo: ", calc.modulo(10, 3))
+        result = 0
+        a_is_neg = a < 0
+        b_is_neg = b < 0
+        
+        a_pos = a if not a_is_neg else (0 - a)
+        b_pos = b if not b_is_neg else (0 - b)
+
+        # แก้ไข Bug 'while a > b' เป็น 'while a_pos >= b_pos'
+        while a_pos >= b_pos:
+            # self.subtract ที่แก้ไขแล้ว
+            a_pos = self.subtract(a_pos, b_pos) 
+            result = self.add(result, 1)
+
+        # หากเครื่องหมายต่างกัน ผลลัพธ์ต้องเป็นลบ
+        if a_is_neg != b_is_neg:
+            result = 0 - result
+            
+        return result
+
+    def modulo(self, a, b):
+        if b == 0:
+            return 0 
+            
+        # 1. หา quotient (a // b)
+        quotient = self.divide(a, b)
+        
+        # 2. หา (b * quotient)
+        b_times_quotient = self.multiply(b, quotient)
+        
+        # 3. หา a - (b * quotient)
+        remainder = self.subtract(a, b_times_quotient)
+        
+        return remainder
